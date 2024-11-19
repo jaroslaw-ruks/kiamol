@@ -1,0 +1,33 @@
+commands:
+	readlink
+
+k8s volumes defaultMode and mode 
+	https://kubernetes.io/docs/concepts/storage/projected-volumes/
+
+      containers:
+        - name: web
+          image: kiamol/ch04-todo-list
+          env:
+          - name: ASPNETCORE_ENVIRONMENT
+            value: Test
+          volumeMounts:
+            - name: config
+              mountPath: "/app/config"
+              readOnly: true
+            - name: secret
+              mountPath: "/app/secrets"
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: todo-web-config-test
+            items:
+            - key: config.json
+              path: config.json
+        - name: secret
+          secret:
+            secretName: todo-web-secret-test
+            defaultMode: 0400
+            items:
+            - key: secrets.json
+              path: secrets.json

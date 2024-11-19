@@ -25,5 +25,5 @@ spec:
     spec:
       containers:
         - name: web
-          image: adminer:4.7-standalone
+          image: adminer:4.8.1-standalone
           args: ["php", "-S", "0.0.0.0:8080", "-t", "/var/www/html"]

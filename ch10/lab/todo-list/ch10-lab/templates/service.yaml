@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ch10-lab.fullname" . }}
+  labels:
+    kiamol: ch10-lab
+spec:
+  type: {{ .Values.serviceType }}
+  ports:
+    - port: {{ .Values.servicePort }}
+      targetPort: 80
+  selector:
+    app: todo-web
+    environment: {{ .Values.environment }}    

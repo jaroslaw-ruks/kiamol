@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: web-startup-script
+data:
+  startup.sh: |
+    #!/bin/sh
+    while true; do echo -e "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: $(cat /data-ro/index.html  |wc -c)\n\n$(cat /data-ro/index.html)\n" | nc -l -p 80; done

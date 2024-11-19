@@ -14,6 +14,36 @@ spec:
       labels:
         app: pi-web
     spec:
+      initContainers:
+        - name: init-html
+          image: kiamol/ch03-sleep
+          command: ['sh', '-c', "echo '<!DOCTYPE html><html><body><h1>KIAMOL HELLLO</h1></body></html>' > /data/index.html"]
+          volumeMounts:
+            - name: data
+              mountPath: /data
+        - name: init-startup-sh
+          image: kiamol/ch03-sleep
+          command: ['cp', '/src-scripts/startup.sh', '/scripts-rw/startup.sh']
+          volumeMounts:
+            - name: script
+              mountPath: "/src-scripts"
+            - name: scripts
+              mountPath: /scripts-rw/
+        - name: init-chmod
+          image: kiamol/ch03-sleep
+          command: ['chmod', '+x', '/scripts-rw/startup.sh']
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts-rw/
+        - name: init-version
+          image: kiamol/ch03-sleep
+          command: ['sh', '-c', 'echo ${APP_VERSION} > /data/appVersion']
+          env:
+            - name: APP_VERSION
+              value: "1.2.3"
+          volumeMounts:
+            - name: data
+              mountPath: /data
       containers:
         - image: kiamol/ch05-pi
           command: ["/scripts/startup.sh"]
@@ -21,3 +51,28 @@ spec:
           ports:
             - containerPort: 80
               name: http
+          volumeMounts:
+            - name: data
+              mountPath: /data-ro
+              readOnly: true
+            - name: scripts
+              mountPath: /scripts
+              readOnly: true
+        - name: app-version
+          image: kiamol/ch03-sleep
+          command: ['sh', '-c', 'while true; do echo -e "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: $(cat /data-ro/appVersion  |wc -c)\n\n$(cat /data-ro/appVersion)" | nc -l -p 8080; done']
+          ports:
+            - containerPort: 8080
+              name: http
+          volumeMounts:
+            - name: data
+              mountPath: /data-ro
+              readOnly: true
+      volumes:
+        - name: script
+          configMap:
+            name: web-startup-script
+        - name: data
+          emptyDir: {}
+        - name: scripts
+          emptyDir: {}
